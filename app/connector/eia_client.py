@@ -4,16 +4,22 @@ import requests
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 
-import Errors.EIAAuthError as AuthError
-import Errors.EIANetworkError as NetworkError
+#import error.EIAAuthError as AuthError
+from connector.error.EIANetworkError import EIANetworkError
+#import error.EIANetworkError as NetworkError
+from connector.error.EIAAuthError import EIAAuthError
 from typing import Any, Generator
 
 import time
 
+from dotenv import load_dotenv
+load_dotenv()
+
 logger = logging.getLogger(__name__)
 
-EIA_BASE_URL = os.getenv("BASE_URL")
 API_KEY = os.getenv("API_KEY")
+EIA_BASE_URL = os.getenv("EIA_BASE_URL")
+
 
 #routes for the endpoint, one per level according to the documentation
 
@@ -33,12 +39,15 @@ class EIAClient:
         self.api_key = api_key or API_KEY
 
         if not self.api_key :
-            raise AuthError(
+            raise EIAAuthError(
                 "EIA_API is not set :/"
-                "Export it before running: export EIA_API=your_own_api_key"
+                "Export it before running: export EIA_API=HDHASHDHAHSDHHASJDHASHJDHASH"
             )
         
-        self.base_url = (base_url or EIA_BASE_URL).rstrip("/")
+        #self.base_url = (base_url or EIA_BASE_URL).rstrip("/")
+        # DESPUÉS
+        self.base_url = (base_url or os.getenv("EIA_BASE_URL") or "https://api.eia.gov/v2").rstrip("/")
+
         self.session = self._build_session()
         logger.info(
             "EIAClient ready | endpoints=%s | key=%s",
@@ -51,14 +60,14 @@ class EIAClient:
 
     Retries up to retries times with exponential backoff on 5xx responses and connectin failures.
     """
-    def _build_session ( retries : int = 2, backoff : float = 1.0) -> requests.Session:
+    def _build_session (self, retries : int = 2, backoff : float = 1.0) -> requests.Session:
         
         session = requests.Session() #creamos una sesion / creating one session for our client
 
         retry = Retry(
             total=retries,
             backoff_factor=backoff,
-            status_forcelist=[500, 502, 503, 504, 404, 200],
+            status_forcelist=[500, 502, 503, 504],
             allowed_methods=["GET"],
             raise_on_redirect=False # we handle status ourselves in _get
         )
@@ -87,20 +96,20 @@ class EIAClient:
         )
 
         try:
-            resp = self.session.get
+            resp = self.session.get(url, params=full_params, timeout=30)
         
         except requests.exceptions.ConnectionError as exc:
-            raise NetworkError(f"Connection failed : {exc} ") from exc
+            raise EIANetworkError(f"Connection failed : {exc} ") from exc
         except requests.exceptions.Timeout as exc:
-            raise NetworkError(f"Request timed out after 30 s: {exc}") from exc
+            raise EIANetworkError(f"Request timed out after 30 s: {exc}") from exc
         
         if resp.status_code == 401:
-            raise AuthError("EAI returned 401 Unauthorized. Verify your EIA_APIK")
+            raise EIAAuthError("EAI returned 401 Unauthorized. Verify your EIA_APIK")
         
         if(resp.status_code == 403):
-            raise AuthError("EIA returned Forbidden. Your key may lac access to this route.")
+            raise EIAAuthError("EIA returned Forbidden. Your key may lac access to this route.")
         if resp.status_code == 404:
-            raise NetworkError(f"Route not found {url}")
+            raise EIAAuthError(f"Route not found {url}")
         
         resp.raise_for_status()
 
@@ -116,7 +125,7 @@ class EIAClient:
     ) -> Generator[list[dict], None, None]:
         
         params ={
-            "lenght" : page_size,
+            "length" : page_size,
             "offset" : 0,
             **(extra_params or {}),
         }
@@ -126,7 +135,7 @@ class EIAClient:
         while True:
             try:
                 body = self.__get(route, params)
-            except NetworkError as exc:
+            except EIANetworkError as exc:
                 logger.error("Network error at offset %d : %s", params["offset"], exc)
 
                 raise
@@ -150,7 +159,7 @@ class EIAClient:
 
             time.sleep(0.2) #rate-limiting between pages
 
-    def __outage_params(
+    def _outage_params(
             self,
             start_date : str | None,
             end_date : str | None,
@@ -165,7 +174,7 @@ class EIAClient:
         """
 
         params : dict[str, Any] ={
-            "frecuency" : "daily",
+            "frequency" : "daily",
             "sort[0][column]" : "period",
             "sort[0][direction]" : "asc",
         }
@@ -179,7 +188,7 @@ class EIAClient:
         
         return params
     
-    def get_genetar_outages(
+    def get_generator_outages(
             self,
             start_date : str | None=None,
             end_date : str | None=None,
@@ -195,7 +204,7 @@ class EIAClient:
         capacity-units, outage-units, percentOutage-units
         """
 
-        params = self.__outage_params(
+        params = self._outage_params(
             start_date,
             end_date,
             data_fields=["capacity", "outage", "percentOutage"],

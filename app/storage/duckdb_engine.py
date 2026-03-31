@@ -50,7 +50,10 @@ class DuckDBEngine:
             if params:
                 result = conn.execute(sql, params).fetchdf()
             else:
+                #para resolver los probleñmas de NaN
+                #agregamos, result.notna() :)
                 result = conn.execute(sql).fetchdf()
+                result = result.where(result.notna(), None)
             return result.to_dict(orient="records")
         except duckdb.IOException as exc:
             # Parquet file doesn't exist yet (no data ingested)

@@ -32,14 +32,14 @@ class USTotals :
     report_date : date
     total_capacity_mw : Optional[float] = None
     total_outage_mw : Optional[float] = None
-    percent_outage_mw : Optional[float] = None
+    percent_outage : Optional[float] = None
 
 @dataclass
 class RefreshLog:
     triggered_at : datetime
     trigger_source: str #It depends on whether the request comes from the API or i donde manually
     status : str # on running, success, error
-    records_added : int = 0
     error_msg : Optional[str]
+    records_added : int = 0
     run_id : Optional[int] = None
     

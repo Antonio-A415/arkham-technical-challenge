@@ -63,6 +63,8 @@ class ParquetWriter:
         # Ensure date column is proper type
         df = df.copy()
         df["report_date"] = pd.to_datetime(df["report_date"]).dt.date
+        #para el problema de Nan
+        df = df.where(df.notna(), None)
         self._upsert(df, FILE_SNAPSHOTS, pk="snapshot_id")
  
     def write_us_totals(self, df: pd.DataFrame) -> None:
@@ -71,6 +73,7 @@ class ParquetWriter:
             return
         df = df.copy()
         df["report_date"] = pd.to_datetime(df["report_date"]).dt.date
+        df = df.where(df.notna, None)
         self._upsert(df, FILE_US_TOTALS, pk="report_date")
  
     def append_refresh_log(self, record: dict) -> None:
