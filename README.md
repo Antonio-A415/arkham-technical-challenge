@@ -91,7 +91,7 @@ Aplicación FastAPI para extraer datos diarios de outages nucleares de la API p�
   - `https://arkham-technical-challenge-production.up.railway.app/`
 
 - UI front-end desplegada (Vercel):
-  - `https://visor-qbv25xxbr-antonios-projects-40aa555e.vercel.app/`
+  - `https://visor-alpha.vercel.app/`
 
 La UI en Vercel ya consume la API desplegada. Si sólo quieres revisar la aplicación sin instalación local, usa estos enlaces.
 
@@ -173,4 +173,4 @@ pytest
 Si deseas ejecutar la UI localmente, asegúrate de que apunte al endpoint de la API desplegada o a `http://localhost:8000` durante desarrollo.
 
 - API desplegada (Railway): https://arkham-technical-challenge-production.up.railway.app/
-- UI desplegada (Vercel): https://visor-qbv25xxbr-antonios-projects-40aa555e.vercel.app/
+- UI desplegada (Vercel): https://visor-alpha.vercel.app/
