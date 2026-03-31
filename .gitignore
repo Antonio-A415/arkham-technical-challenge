@@ -1,0 +1,18 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+# Entorno virtual
+intern-challenge/
+
+# Variables de entorno
+.env
+.env.*
+
+# Logs
+logs/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Tests
+.pytest_cache/
