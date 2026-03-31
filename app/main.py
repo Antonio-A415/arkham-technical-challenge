@@ -48,7 +48,7 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-ALLOWED_ORIGINS = os.getenv("CORS_ORIGIN","https://visor-qbv25xxbr-antonios-projects-40aa555e.vercel.app").split(",")
+ALLOWED_ORIGINS = os.getenv("CORS_ORIGIN","https://visor-alpha.vercel.app/").split(",")
 print("ALLOWED_ORIGINS:", ALLOWED_ORIGINS)
 #adding middlewares
 
