@@ -8,6 +8,43 @@ Aplicación FastAPI para extraer datos diarios de outages nucleares de la API p�
 - `pip`
 - `docker` / `docker compose` (opcional)
 
+## Quick start
+
+### Local
+1. Abre el proyecto en tu terminal.
+2. Activa el entorno virtual:
+   ```powershell
+   .\intern-challenge\Scripts\Activate.ps1
+   ```
+3. Instala dependencias:
+   ```powershell
+   pip install -r requirements.txt
+   ```
+4. Crea un archivo `.env` en la raíz con las variables necesarias.
+5. Ejecuta la API:
+   ```powershell
+   cd app
+   uvicorn main:app --host 0.0.0.0 --port 8000
+   ```
+
+### Nube
+- Usa la API desplegada en Railway.
+- Usa la UI desplegada en Vercel.
+
+## API key setup
+
+- `API_KEY`: clave de la EIA API, requerida para que `/refresh` pueda obtener datos externos.
+- `APP_API_KEY`: clave opcional para proteger los endpoints de la API en `X-API-Key`.
+- Ejemplo de `.env`:
+  ```env
+  API_KEY=tu_api_key_de_eia
+  APP_API_KEY=tu_api_key_para_api
+  EIA_BASE_URL=https://api.eia.gov/v2
+  DATA_DIR=data
+  LOG_DIR=logs
+  CORS_ORIGIN=http://localhost:5173,http://localhost:3000
+  ```
+
 ## Opciones de uso
 
 ### Opción 1: Ver localmente
@@ -79,6 +116,46 @@ La UI en Vercel ya consume la API desplegada. Si sólo quieres revisar la aplica
 - `POST /refresh` — dispara la extracción de datos desde EIA
 
 > Nota: si configuras `APP_API_KEY`, añade la cabecera `X-API-Key` en las peticiones.
+
+## Assumptions made
+
+- El proyecto implementa una API mínima con dos servicios clave: `/data` y `/refresh`.
+- La extracción se realiza desde la API pública de EIA y se almacena localmente en `data/`.
+- El servicio puede ejecutarse localmente o consumirse desde la nube.
+- La autenticación es opcional y se habilita solo con `APP_API_KEY`.
+- El frontend desplegado consume la API remota; el backend se puede ejecutar local o en Railway.
+
+## Result examples
+
+### Ejemplo: `GET /data?limit=10&page=1`
+
+```json
+{
+  "items": [
+    {
+      "snapshot_id": "2024-03-01-123",
+      "report_date": "2024-03-01",
+      "facility_name": "Plant A",
+      "state": "VA",
+      "status": "Outage",
+      "duration_hours": 12
+    }
+  ],
+  "page": 1,
+  "limit": 10,
+  "total": 42
+}
+```
+
+### Ejemplo: `POST /refresh`
+
+```json
+{
+  "success": true,
+  "message": "Datos extraídos correctamente",
+  "records_loaded": 15
+}
+```
 
 ## Tests
 
