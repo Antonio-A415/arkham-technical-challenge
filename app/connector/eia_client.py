@@ -36,7 +36,7 @@ class EIAClient:
     """
 
     def __init__(self, api_key : str | None=None, base_url : str | None=None):
-        self.api_key = api_key or API_KEY
+        self.api_key = api_key or os.getenv("API_KEY")
 
         if not self.api_key :
             raise EIAAuthError(
