@@ -1,4 +1,11 @@
-python-dotenv
-fastapi
-python-dotenv
-uvicorn[standard]
+fastapi==0.135.2
+uvicorn[standard]==0.42.0
+python-dotenv==1.2.2
+pydantic==2.12.5
+duckdb==1.5.1
+pandas==3.0.1
+numpy==2.4.4
+pyarrow==23.0.1
+requests==2.33.0
+python-dateutil==2.9.0.post0
+PyYAML==6.0.3
