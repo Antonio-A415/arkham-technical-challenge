@@ -1,9 +1,13 @@
 """
 Nuclear Ouatges Pipeline via FastAPI application entry point
 """
-
-import logging 
+import sys
 import os
+
+# Asegura que el directorio de la app esté en el path
+sys.path.insert(0, os.path.dirname(__file__))
+import logging 
+
 
 from pathlib import Path
 
